@@ -28,7 +28,6 @@ CREATE TABLE IF NOT EXISTS comunas
 
 );
 -- insert comuna de Santiago
---INSERT INTO comunas (nombrecomuna, ciudad_id) VALUES ('SANTIAGO', select id from ciudades where nombreciudad = 'SANTIAGO');
 INSERT INTO comunas (nombrecomuna, ciudad_id) VALUES ('SANTIAGO', 1);
 
 
@@ -54,7 +53,7 @@ INSERT INTO direcciones (calle, numero, comuna_id) values ('PASAJE',3,1);
 
 CREATE TABLE IF NOT EXISTS socios
 (
-    id integer NOT NULL,
+    id serial,
     rut VARCHAR(255) NOT NULL,
     nombre VARCHAR(255) NOT NULL,
     apellido VARCHAR(255),
@@ -64,8 +63,16 @@ CREATE TABLE IF NOT EXISTS socios
     FOREIGN KEY (direccion_id) REFERENCES direcciones (id)
 );
 
+-- inserto registro socios
+INSERT INTO socios (rut, nombre, apellido, direccion_id, telefono ) values ('1111111-1','JUAN','SOTO',1,911111111);
+INSERT INTO socios (rut, nombre, apellido, direccion_id, telefono ) values ('2222222-2','ANA','PEREZ',2,922222222);
+INSERT INTO socios (rut, nombre, apellido, direccion_id, telefono ) values ('3333333-3','SANDRA','AGUILAR',3,933333333);
+INSERT INTO socios (rut, nombre, apellido, direccion_id, telefono ) values ('4444444-4','ESTEBAN','JEREZ',4,944444444);
+INSERT INTO socios (rut, nombre, apellido, direccion_id, telefono ) values ('5555555-5','SILVANA','MUÑOZ',5,955555555);
+
+
 -- cargo datos de los socios tabla csv
-\copy socios from socios.csv csv header;
+--\copy socios from socios.csv csv header;
 
 
 CREATE TABLE IF NOT EXISTS libros
@@ -83,7 +90,7 @@ CREATE TABLE IF NOT EXISTS libros
 
 CREATE TABLE IF NOT EXISTS prestamos
 (
-    id integer NOT NULL,
+    id serial,
     socio_id integer NOT NULL DEFAULT 0,
     libro_isbn numeric NOT NULL DEFAULT 0,
     fechainicio date NOT NULL DEFAULT now(),
@@ -93,7 +100,14 @@ CREATE TABLE IF NOT EXISTS prestamos
     FOREIGN KEY (libro_isbn) REFERENCES libros (isbn)
 );
 
-\copy PRESTAMOS from PRESTAMOS.csv csv header;
+-- inserto registro prestamos
+INSERT INTO prestamos (socio_id, libro_isbn, fechainicio, fechadevolucion) values (1,1111111111111,'20-01-2020','27-01-2020');
+INSERT INTO prestamos (socio_id, libro_isbn, fechainicio, fechadevolucion) values (5,2222222222222,'20-01-2020','30-01-2020');
+INSERT INTO prestamos (socio_id, libro_isbn, fechainicio, fechadevolucion) values (3,3333333333333,'22-01-2020','30-01-2020');
+INSERT INTO prestamos (socio_id, libro_isbn, fechainicio, fechadevolucion) values (4,4444444444444,'23-01-2020','30-01-2020');
+INSERT INTO prestamos (socio_id, libro_isbn, fechainicio, fechadevolucion) values (2,1111111111111,'27-01-2020','04-02-2020');
+INSERT INTO prestamos (socio_id, libro_isbn, fechainicio, fechadevolucion) values (1,4444444444444,'31-01-2020','12-02-2020');
+INSERT INTO prestamos (socio_id, libro_isbn, fechainicio, fechadevolucion) values (3,2222222222222,'31-01-2020','12-02-2020');
 
 
 CREATE TABLE IF NOT EXISTS autores
@@ -106,10 +120,10 @@ CREATE TABLE IF NOT EXISTS autores
     PRIMARY KEY (codigo)
 );
 
--- poblo datos autores
+-- inserto datos autores
 INSERT INTO autores (codigo, nombre, apellido, fechanacimiento, fechamuerte) values (3,'JOSE','SALGADO', '01-01-1968', '01-01-2020');
 INSERT INTO autores (codigo, nombre, apellido, fechanacimiento) values (4,'ANA','SALGADO','01-01-1972');
-INSERT INTO autores (codigo, nombre, apellido, fechanacimiento) values (1,'ANDRÉS','ULLOA','01-01-1982');
+INSERT INTO autores (codigo, nombre, apellido, fechanacimiento) values (1,'ANDRES','ULLOA','01-01-1982');
 INSERT INTO autores (codigo, nombre, apellido, fechanacimiento, fechamuerte) values (2,'SERGIO','MARDONES','01-01-1950','01-01-2012');
 INSERT INTO autores (codigo, nombre, apellido, fechanacimiento) values (5,'MARTIN','PORTA','01-01-1976');
 
@@ -125,3 +139,50 @@ CREATE TABLE IF NOT EXISTS libros_autores
 );
 
 \copy libros_autores from libros_autores.csv csv header;
+
+
+--3. Realizar las siguientes consultas:
+--a. Mostrar todos los libros que posean menos de 300 páginas. (0.5 puntos)
+
+SELECT * FROM libros WHERE numpagina < 300;
+
+--b. Mostrar todos los autores que hayan nacido después del 01-01-1970.
+
+SELECT * FROM autores WHERE fechanacimiento > '01-01-1970';
+
+--c. ¿Cuál es el libro más solicitado? (0.5 puntos).
+
+SELECT prestamos.libro_isbn, COUNT(prestamos.*) as cantidad FROM prestamos GROUP BY libro_isbn ORDER BY cantidad DESC limit 1;
+
+SELECT libros.isbn, libros,titulo FROM libros, prestamos WHERE libros.isbn = ();
+
+
+SELECT  COUNT(libro_isbn) FROM prestamos GROUP BY libro_isbn ORDER BY libro_isbn DESC LIMIT 1;
+
+SELECT libro_isbn,  COUNT(*) as cantidad FROM prestamos GROUP BY libro_isbn ORDER BY cantidad DESC limit 1;
+
+SELECT prestamos.libro_isbn, libros.titulo, COUNT(prestamos.libro_isbn) AS cantidad FROM prestamos, libros WHERE prestamos.libro_isbn = libros.isbn ORDER BY cantidad DESC;
+
+SELECT COUNT(libro_isbn)  FROM prestamos  ORDER BY libro_isbn DESC;
+
+SELECT COUNT(libro_isbn)  FROM prestamos;
+
+SELECT prestamos.libro_isbn, libros.titulo FROM prestamos, libros WHERE libros.isbn = (SELECT COUNT(libro_isbn)  FROM prestamos  ORDER BY libro_isbn DESC);
+ORDER BY prestamos.libro_isbn DESC;
+
+
+ORDER BY cantidad DESC;
+
+    SELECT prestamos.libro_isbn, libros.titulo, count  FROM prestamos, libros WHERE prestamos.libro_isbn = libros.isbn ORDER BY cantidad 
+    id integer NOT NULL,
+    socio_id integer NOT NULL DEFAULT 0,
+    libro_isbn numeric NOT NULL DEFAULT 0,
+    fechainicio date NOT NULL DEFAULT now(),
+    fechadevolucion date,
+    PRIMARY KEY (id),
+    FOREIGN KEY (socio_id) REFERENCES socios (id),
+    FOREIGN KEY (libro_isbn) REFERENCES libros (isbn)
+
+--d. Si se cobrara una multa de $100 por cada día de atraso, mostrar cuánto
+--debería pagar cada usuario que entregue el préstamo después de 7 días.
+--(0.5 puntos)

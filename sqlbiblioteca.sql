@@ -161,7 +161,5 @@ SELECT  libro_isbn, COUNT(libro_isbn) as cantidad_prestamo FROM prestamos  GROUP
 
 --d. Si se cobrara una multa de $100 por cada día de atraso, mostrar cuánto
 --debería pagar cada usuario que entregue el préstamo después de 7 días.
---(0.5 puntos)
-
 
 SELECT socios.nombre, socios.apellido, prestamos.libro_isbn, prestamos.socio_id, prestamos.fechainicio, prestamos.fechadevolucion, libros.diasprestamo,(((prestamos.fechadevolucion - prestamos.fechainicio) - libros.diasprestamo) * 100) AS montodeuda   FROM prestamos, libros, socios WHERE prestamos.libro_isbn = libros.isbn AND prestamos.socio_id = socios.id AND (((prestamos.fechadevolucion - prestamos.fechainicio) - libros.diasprestamo) * 100) >= 100;
